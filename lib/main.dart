@@ -91,6 +91,7 @@ Future<void> main() async {
           Platform.isLinux
       ? null
       : await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
+
   String initialRoute = HomePage.routeName;
   if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
     selectedNotificationPayload =
@@ -99,7 +100,7 @@ Future<void> main() async {
   }
 
   const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('app_icon');
+      AndroidInitializationSettings('@mipmap/ic_launcher');
 
   final List<DarwinNotificationCategory> darwinNotificationCategories =
       <DarwinNotificationCategory>[
@@ -153,8 +154,12 @@ Future<void> main() async {
     requestAlertPermission: false,
     requestBadgePermission: false,
     requestSoundPermission: false,
-    onDidReceiveLocalNotification:
-        (int id, String? title, String? body, String? payload) async {
+    onDidReceiveLocalNotification: (
+      int id,
+      String? title,
+      String? body,
+      String? payload,
+    ) async {
       didReceiveLocalNotificationStream.add(
         ReceivedNotification(
           id: id,
@@ -166,16 +171,18 @@ Future<void> main() async {
     },
     notificationCategories: darwinNotificationCategories,
   );
-  final LinuxInitializationSettings initializationSettingsLinux =
-      LinuxInitializationSettings(
-    defaultActionName: 'Open notification',
-    defaultIcon: AssetsLinuxIcon('icons/app_icon.png'),
-  );
+
+  // final LinuxInitializationSettings initializationSettingsLinux =
+  //     LinuxInitializationSettings(
+  //   defaultActionName: 'Open notification',
+  //   defaultIcon: AssetsLinuxIcon('icons/app_icon.png'),
+  // );
+
   final InitializationSettings initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
     iOS: initializationSettingsDarwin,
-    macOS: initializationSettingsDarwin,
-    linux: initializationSettingsLinux,
+    // macOS: initializationSettingsDarwin,
+    // linux: initializationSettingsLinux,
   );
   await flutterLocalNotificationsPlugin.initialize(
     initializationSettings,
@@ -1076,16 +1083,24 @@ class HomePageState extends State<HomePage> {
 
   Future<void> _showNotification() async {
     const AndroidNotificationDetails androidNotificationDetails =
-        AndroidNotificationDetails('your channel id', 'your channel name',
-            channelDescription: 'your channel description',
-            importance: Importance.max,
-            priority: Priority.high,
-            ticker: 'ticker');
+        AndroidNotificationDetails(
+      'your channel id',
+      'your channel name',
+      channelDescription: 'your channel description',
+      importance: Importance.max,
+      priority: Priority.high,
+      ticker: 'ticker',
+    );
+
     const NotificationDetails notificationDetails =
         NotificationDetails(android: androidNotificationDetails);
     await flutterLocalNotificationsPlugin.show(
-        id++, 'plain title', 'plain body', notificationDetails,
-        payload: 'item x');
+      id++,
+      'plain title',
+      'plain body',
+      notificationDetails,
+      payload: 'item x',
+    );
   }
 
   Future<void> _showNotificationWithActions() async {
@@ -1395,32 +1410,38 @@ class HomePageState extends State<HomePage> {
 
   Future<void> _zonedScheduleNotification() async {
     await flutterLocalNotificationsPlugin.zonedSchedule(
-        0,
-        'scheduled title',
-        'scheduled body',
-        tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
-        const NotificationDetails(
-            android: AndroidNotificationDetails(
-                'your channel id', 'your channel name',
-                channelDescription: 'your channel description')),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime);
+      0,
+      'scheduled title',
+      'scheduled body',
+      tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+            'your channel id', 'your channel name',
+            channelDescription: 'your channel description'),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
   }
 
   Future<void> _zonedScheduleAlarmClockNotification() async {
     await flutterLocalNotificationsPlugin.zonedSchedule(
-        123,
-        'scheduled alarm clock title',
-        'scheduled alarm clock body',
-        tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
-        const NotificationDetails(
-            android: AndroidNotificationDetails(
-                'alarm_clock_channel', 'Alarm Clock Channel',
-                channelDescription: 'Alarm Clock Notification')),
-        androidScheduleMode: AndroidScheduleMode.alarmClock,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime);
+      123,
+      'scheduled alarm clock title',
+      'scheduled alarm clock body',
+      tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'alarm_clock_channel',
+          'Alarm Clock Channel',
+          channelDescription: 'Alarm Clock Notification',
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.alarmClock,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
   }
 
   Future<void> _showNotificationWithNoSound() async {
@@ -1438,7 +1459,11 @@ class HomePageState extends State<HomePage> {
         iOS: darwinNotificationDetails,
         macOS: darwinNotificationDetails);
     await flutterLocalNotificationsPlugin.show(
-        id++, '<b>silent</b> title', '<b>silent</b> body', notificationDetails);
+      id++,
+      '<b>silent</b> title',
+      '<b>silent</b> body',
+      notificationDetails,
+    );
   }
 
   Future<void> _showSoundUriNotification() async {
@@ -1456,7 +1481,11 @@ class HomePageState extends State<HomePage> {
     final NotificationDetails notificationDetails =
         NotificationDetails(android: androidNotificationDetails);
     await flutterLocalNotificationsPlugin.show(
-        id++, 'uri sound title', 'uri sound body', notificationDetails);
+      id++,
+      'uri sound title',
+      'uri sound body',
+      notificationDetails,
+    );
   }
 
   Future<void> _showTimeoutNotification() async {
@@ -1467,8 +1496,12 @@ class HomePageState extends State<HomePage> {
             styleInformation: DefaultStyleInformation(true, true));
     const NotificationDetails notificationDetails =
         NotificationDetails(android: androidNotificationDetails);
-    await flutterLocalNotificationsPlugin.show(id++, 'timeout notification',
-        'Times out after 3 seconds', notificationDetails);
+    await flutterLocalNotificationsPlugin.show(
+      id++,
+      'timeout notification',
+      'Times out after 3 seconds',
+      notificationDetails,
+    );
   }
 
   Future<void> _showInsistentNotification() async {
@@ -1484,8 +1517,12 @@ class HomePageState extends State<HomePage> {
     final NotificationDetails notificationDetails =
         NotificationDetails(android: androidNotificationDetails);
     await flutterLocalNotificationsPlugin.show(
-        id++, 'insistent title', 'insistent body', notificationDetails,
-        payload: 'item x');
+      id++,
+      'insistent title',
+      'insistent body',
+      notificationDetails,
+      payload: 'item x',
+    );
   }
 
   Future<String> _downloadAndSaveFile(String url, String fileName) async {
@@ -1498,6 +1535,7 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _showBigPictureNotification() async {
+    /*  */
     final String largeIconPath =
         await _downloadAndSaveFile('https://dummyimage.com/48x48', 'largeIcon');
     final String bigPicturePath = await _downloadAndSaveFile(
@@ -1517,7 +1555,11 @@ class HomePageState extends State<HomePage> {
     final NotificationDetails notificationDetails =
         NotificationDetails(android: androidNotificationDetails);
     await flutterLocalNotificationsPlugin.show(
-        id++, 'big text title', 'silent body', notificationDetails);
+      id++,
+      'big text title',
+      'silent body',
+      notificationDetails,
+    );
   }
 
   Future<String> _base64encodedImage(String url) async {
